@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1756403520 source:c:\users\rafae\desktop\escolafaculdade\tp2\ls\ls\main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	<string.h>
+	<ctype.h>
+
