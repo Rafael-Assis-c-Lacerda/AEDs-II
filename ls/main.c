@@ -65,23 +65,24 @@ bool soInteiro(char str []){ //função que retorna se só tem inteiro
 }
 
 bool soFloat(char str []){ //função que retorna se só tem numero real
-    int n = strlen(str); //tamnho da string
+    int n = strlen(str); //tamanho da string
     bool resposta = true;
+    bool virgula = false;
 
     int i = 0;
 
-    if(str[0]==',' || str[0]=='.'){ //verifica se é float, se não for ja retorna false
         while(i<n){ //loop para passar por todos os caracteres
-            if(str[i]<'0' || str[i]>'9'){ //verifica se o caractere é um numero
-            resposta = false;
-            i=n;
-        }
+
+            if(str[i]==',' || str[i]=='.'){
+                virgula = true;//verifica se é float, se não for ja retorna false
+            }else if (str[i]<'0' || str[i]>'9'){ //verifica se o caractere é um numero
+                resposta = false;
+                i=n;
+            }
         i++;
         }
+    if(!virgula)resposta = false;
 
-    }else{
-        resposta = false;
-    }
     return resposta;
 }
 
