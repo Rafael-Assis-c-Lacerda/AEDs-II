@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1756955981 source:c:\users\rafae\desktop\escola\codigos\aeds2\c\somadigitos\somadigitos\main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	<string.h>
+	<ctype.h>
+
