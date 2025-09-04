@@ -95,7 +95,9 @@ public class Main{
                 if(resposta){
                     System.out.println("SIM");
                 }else{
-                    System.out.println("NÃO");
+                    //System.out.println("NÃO"); 
+                    MyIO.println("NÃO"); // Tive que utilizar por conta do verde nao aceitar o ~
+
                 }
             }
 
