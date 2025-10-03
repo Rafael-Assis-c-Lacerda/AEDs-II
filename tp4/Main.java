@@ -2,6 +2,7 @@ import java.util.Scanner;
 import java.io.*;
 
 class Game{
+    //atributos dos games
     private int id;
     private String name;
     private String date;
@@ -25,7 +26,7 @@ class Game{
     public void setNome(String name) {
         this.name = name;
     }
-    public void setData(String data) {
+    public void setData(String data) { //metodo data que troca palavra pelo numero e trata as excessões
         String mes = "", dia = "", ano = "", resp = "";
         for(int i = 0; i < 3; i++) {
             mes += data.charAt(i);
@@ -208,7 +209,7 @@ class Game{
 		}
         return resposta;
     }
-    public String printElementosMultiplos(String [] elementos){
+    public String printElementosMultiplos(String [] elementos){ //função para auxiliar o print
         String aux = "[";
 
         for(int i = 0; i<elementos.length;i++){
@@ -221,7 +222,7 @@ class Game{
         return aux;
     }
 
-    public String[] formatar(String entrada) { //função utilizada nos casos que tem mais de 1 elemento em uma parte
+    public String[] formatar(String entrada) { //função que formata os casos que tem mais de 1 elemento em uma parte
         int virgulas = 0;
         for(int i = 0; i < entrada.length(); i++) {
             char c = entrada.charAt(i);
@@ -249,7 +250,7 @@ class Game{
         return resp;
     }
 
-    public String printResultado() {
+    public String printResultado() { //metodo print final
         return ("=> " + id + " ## " + name + " ## " + date + " ## " + jogadores + " ## " + preco + " ## " + printElementosMultiplos(linguas) + " ## " + notaEspecial + " ## " + notaUsuario + " ## " + conquistas + " ## " + printElementosMultiplos(publishers) + " ## " + printElementosMultiplos(developers) + " ## " + printElementosMultiplos(categorias) + " ## " + printElementosMultiplos(generos) + " ## " + printElementosMultiplos(tags) + " ## ");
     }
 }
@@ -275,7 +276,7 @@ public class Main{
         return resposta;
     }
 
-    public static void sets(Game game, String array[]){
+    public static void sets(Game game, String array[]){ //função de set tudo dos objetos
         game.setId(array[0]);
         game.setNome(array[1]);
         game.setData(array[2]);
@@ -293,11 +294,12 @@ public class Main{
     }
 
     public static void main(String []args) throws FileNotFoundException{
+        //declaração scanners (teclado e arquivo)
         Scanner scanner = new Scanner(System.in);
         File arq = new File("games.csv");
         Scanner scannerArq = new Scanner(arq);
 
-        Game game[] = new Game[2000];
+        Game game[] = new Game[2000]; // array que vai guardar os nossos jogos
         int jogos = 0;
 
         //System.out.println("teste1");
@@ -307,7 +309,7 @@ public class Main{
             scannerArq.nextLine();
         }
 
-        while(scannerArq.hasNextLine()) {
+        while(scannerArq.hasNextLine()) { //loop que vai ler linha por linha
 
             String entrada = scannerArq.nextLine();
 
@@ -316,7 +318,7 @@ public class Main{
             int contador = 0;
             boolean aspas = false;
 
-            for(int i = 0; i<entrada.length(); i++){
+            for(int i = 0; i<entrada.length(); i++){ //loop que vai até o final da linha, dividindo ela em partes
                 char c = entrada.charAt(i);
 
                 if(c == '"'){
@@ -333,6 +335,7 @@ public class Main{
 
             array[contador] = aux;
 
+            //cria o objeto jogo e chama função de setar tudo
             game[jogos] = new Game();
             sets(game[jogos], array);
             jogos++;
