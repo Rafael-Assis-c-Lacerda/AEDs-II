@@ -83,7 +83,7 @@ class Game{
     }
 
     public void setLinguas(String linguas) {
-        this.linguas = formatar(linguas);
+        this.linguas = formatar(linguas,0);
     }
 
     public void setNotaEspecial(String notaEspecial) {
@@ -114,23 +114,23 @@ class Game{
     }
 
     public void setPublishers(String publishers) {
-        this.publishers = formatar(publishers);
+        this.publishers = formatar(publishers,0);
     }
 
     public void setDevelopers(String developers) {
-        this.developers = formatar(developers);
+        this.developers = formatar(developers,0);
     }
 
     public void setCategorias(String categorias) {
-        this.categorias = formatar(categorias);
+        this.categorias = formatar(categorias,0);
     }
 
     public void setGeneros(String generos) {
-        this.generos = formatar(generos);
+        this.generos = formatar(generos,1);
     }
 
     public void setTags(String tags) {
-        this.tags = formatar(tags);
+        this.tags = formatar(tags,1);
     }
 
     //metodos get
@@ -209,20 +209,30 @@ class Game{
 		}
         return resposta;
     }
-    public String printElementosMultiplos(String [] elementos){ //função para auxiliar o print
+    public String printElementosMultiplos(String [] elementos, int tipo){ //função para auxiliar o print
         String aux = "[";
 
-        for(int i = 0; i<elementos.length;i++){
-            aux = aux + elementos[i];
-            if(i<elementos.length - 1){
-                aux = aux + ", ";
+        if(tipo == 0){
+            for(int i = 0; i<elementos.length;i++){
+                aux = aux + elementos[i];
+                if(i<elementos.length - 1){
+                    aux = aux + ",";
+                }
+            }
+        }else{
+            for(int i = 0; i<elementos.length;i++){
+                aux = aux + elementos[i];
+                if(i<elementos.length - 1){
+                    aux = aux + ", ";
+                }
             }
         }
+        
         aux = aux + "]";
         return aux;
     }
 
-    public String[] formatar(String entrada) { //função que formata os casos que tem mais de 1 elemento em uma parte
+    public String[] formatar(String entrada, int tipo) { //função que formata os casos que tem mais de 1 elemento em uma parte
         int virgulas = 0;
         for(int i = 0; i < entrada.length(); i++) {
             char c = entrada.charAt(i);
@@ -233,17 +243,33 @@ class Game{
         String resp[] = new String[virgulas + 1];
         String aux = "";
         int contador = 0;
-        for(int i = 0; i < entrada.length(); i++) {
-            char c = entrada.charAt(i); 
-            if(c == ',') {
-                resp[contador] = aux;
-                contador++;
-                aux = "";
+        if(tipo == 1){
+            for(int i = 0; i < entrada.length(); i++) {
+                char c = entrada.charAt(i); 
+                if(c == ',') {
+                    resp[contador] = aux;
+                    contador++;
+                    aux = "";
+                }
+                else {
+                    if(!(c == '[' || c == ']')) {
+                        aux += c;
+                    } 
+                }
             }
-            else {
-                if(!(c == '[' || c == ']' || c == '\'')) {
-                    aux += c;
-                } 
+        }else{
+            for(int i = 0; i < entrada.length(); i++) {
+                char c = entrada.charAt(i); 
+                if(c == ',') {
+                    resp[contador] = aux;
+                    contador++;
+                    aux = "";
+                }
+                else {
+                    if(!(c == '[' || c == ']' || c == '\'')) {
+                        aux += c;
+                    } 
+                }
             }
         }
         resp[contador] = aux;
@@ -251,7 +277,7 @@ class Game{
     }
 
     public String printResultado() { //metodo print final
-        return ("=> " + id + " ## " + name + " ## " + date + " ## " + jogadores + " ## " + preco + " ## " + printElementosMultiplos(linguas) + " ## " + notaEspecial + " ## " + notaUsuario + " ## " + conquistas + " ## " + printElementosMultiplos(publishers) + " ## " + printElementosMultiplos(developers) + " ## " + printElementosMultiplos(categorias) + " ## " + printElementosMultiplos(generos) + " ## " + printElementosMultiplos(tags) + " ## ");
+        return ("=> " + id + " ## " + name + " ## " + date + " ## " + jogadores + " ## " + preco + " ## " + printElementosMultiplos(linguas,0) + " ## " + notaEspecial + " ## " + notaUsuario + " ## " + conquistas + " ## " + printElementosMultiplos(publishers,1) + " ## " + printElementosMultiplos(developers,1) + " ## " + printElementosMultiplos(categorias,1) + " ## " + printElementosMultiplos(generos,1) + " ## " + printElementosMultiplos(tags,1) + " ##");
     }
 }
 
