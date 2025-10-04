@@ -114,7 +114,7 @@ class Game{
     }
 
     public void setPublishers(String publishers) {
-        this.publishers = formatar(publishers,0);
+        this.publishers = removerEspacosIniciais(formatar(publishers,0));
     }
 
     public void setDevelopers(String developers) {
