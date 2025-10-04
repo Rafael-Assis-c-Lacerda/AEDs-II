@@ -118,7 +118,7 @@ class Game{
     }
 
     public void setDevelopers(String developers) {
-        this.developers = formatar(developers,0);
+        this.developers = removerEspacosIniciais(formatar(developers,0));
     }
 
     public void setCategorias(String categorias) {
@@ -209,27 +209,39 @@ class Game{
 		}
         return resposta;
     }
-    public String printElementosMultiplos(String [] elementos, int tipo){ //função para auxiliar o print
-        String aux = "[";
 
-        if(tipo == 0){
-            for(int i = 0; i<elementos.length;i++){
-                aux = aux + elementos[i];
-                if(i<elementos.length - 1){
-                    aux = aux + ",";
-                }
-            }
-        }else{
-            for(int i = 0; i<elementos.length;i++){
-                aux = aux + elementos[i];
-                if(i<elementos.length - 1){
-                    aux = aux + ", ";
-                }
+    public String[] removerEspacosIniciais(String[] array) {
+        if (array == null) {
+            return null;
+        }
+        
+        String[] resultado = new String[array.length];
+        
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] != null) {
+                // Remove apenas espaços do início usando replaceFirst
+                resultado[i] = array[i].replaceFirst("^\\s+", "");
+            } else {
+                resultado[i] = null;
             }
         }
         
-        aux = aux + "]";
-        return aux;
+        return resultado;
+    }
+
+    public String printElementosMultiplos(String [] array, int aux){ //função para auxiliar o print
+        String result = "[";
+        for(int i = 0; i < array.length; i++) {
+            result += array[i];
+            if(i < array.length - 1 && aux == 0) {
+                result += ",";
+            }
+            else if(i < array.length - 1 && aux == 1) {
+                result += ", ";
+            }
+        }
+        result += "]";
+        return result;
     }
 
     public String[] formatar(String entrada, int tipo) { //função que formata os casos que tem mais de 1 elemento em uma parte
@@ -382,6 +394,7 @@ public class Main{
                 for(int i = 0; i < jogos; i++) {
                     if(Busca == game[i].getId()) {
                         System.out.println(game[i].printResultado());
+                        
                         i = jogos;
                     }
                 }
