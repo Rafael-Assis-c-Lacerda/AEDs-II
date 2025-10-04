@@ -174,9 +174,9 @@ char** removerEspacosIniciais(char** array, int size) {
     if (array == NULL) {
         return NULL;
     }
-
+    
     char** resultado = (char**)malloc(size * sizeof(char*));
-
+    
     for (int i = 0; i < size; i++) {
         if (array[i] != NULL) {
             const char* p = array[i];
@@ -215,7 +215,7 @@ char** formatar(const char* entrada, int tipo, int* count) {
     }
     *count = virgulas + 1;
     char** resp = (char**)malloc((*count) * sizeof(char*));
-
+    
     char aux[MAX_FIELD_SIZE] = {0};
     int contador = 0;
     int aux_idx = 0;
@@ -236,14 +236,30 @@ char** formatar(const char* entrada, int tipo, int* count) {
     }
     aux[aux_idx] = '\0';
     resp[contador] = strdup(aux);
-
+    
     return resp;
 }
 
+// ===================================================================
+// FUNÇÃO CORRIGIDA PARA IMPRESSÃO IDÊNTICA AO JAVA
+// ===================================================================
 void printResultado(Game* game) {
-    printf("=> %d ## %s ## %s ## %d ## %.2f ## ", game->id, game->name, game->date, game->jogadores, game->preco);
+    // Imprime a parte inicial até o preço
+    printf("=> %d ## %s ## %s ## %d ## ", game->id, game->name, game->date, game->jogadores);
+    
+    // Lógica customizada para imprimir 'preco' de forma idêntica ao Java
+    char preco_str[50];
+    sprintf(preco_str, "%g", game->preco);
+    if (strchr(preco_str, '.') == NULL) { // Se não houver ponto decimal...
+        strcat(preco_str, ".0");          // ...adiciona ".0"
+    }
+    printf("%s ## ", preco_str);
+
+    // Imprime a parte do meio
     printElementosMultiplos(game->linguas, game->numLinguas, 0);
     printf(" ## %d ## %.1f ## %d ## ", game->notaEspecial, game->notaUsuario, game->conquistas);
+    
+    // Imprime o restante dos arrays
     printElementosMultiplos(game->publishers, game->numPublishers, 1);
     printf(" ## ");
     printElementosMultiplos(game->developers, game->numDevelopers, 1);
@@ -255,6 +271,7 @@ void printResultado(Game* game) {
     printElementosMultiplos(game->tags, game->numTags, 1);
     printf(" ##\n");
 }
+// ===================================================================
 
 void sets(Game* game, char* array[]) {
     setId(game, array[0]);
@@ -309,7 +326,7 @@ int main() {
     while (fgets(linha, MAX_LINE_SIZE, arq) && jogos < MAX_GAMES) {
         // Remove a quebra de linha do final, se houver
         linha[strcspn(linha, "\n")] = 0;
-
+        
         char* array[14];
         char aux[MAX_FIELD_SIZE] = {0};
         int contador = 0;
@@ -336,7 +353,7 @@ int main() {
 
         // Inicializa a struct para evitar ponteiros inválidos
         memset(&games[jogos], 0, sizeof(Game));
-
+        
         // Popula a struct
         sets(&games[jogos], array);
         jogos++;
@@ -350,14 +367,14 @@ int main() {
 
     const char* flag = "FIM";
     char busca[MAX_INPUT_SIZE];
-
+    
     while (true) {
         if (fgets(busca, MAX_INPUT_SIZE, stdin) == NULL) {
             break; // Fim da entrada
         }
         // Remove a quebra de linha
-        busca[strcspn(busca, "\n")] = 0;
-
+        busca[strcspn(busca, "\n")] = 0; 
+        
         if (compare(busca, flag)) {
             break;
         } else {
