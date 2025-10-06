@@ -240,9 +240,6 @@ char** formatar(const char* entrada, int tipo, int* count) {
     return resp;
 }
 
-// ===================================================================
-// FUNÇÃO CORRIGIDA PARA IMPRESSÃO IDÊNTICA AO JAVA
-// ===================================================================
 void printResultado(Game* game) {
     // Imprime a parte inicial até o preço
     printf("=> %d ## %s ## %s ## %d ## ", game->id, game->name, game->date, game->jogadores);
@@ -269,9 +266,9 @@ void printResultado(Game* game) {
     printElementosMultiplos(game->generos, game->numGeneros, 1);
     printf(" ## ");
     printElementosMultiplos(game->tags, game->numTags, 1);
-    printf(" ##\n");
+    printf(" ##");
+    printf("\n");
 }
-// ===================================================================
 
 void sets(Game* game, char* array[]) {
     setId(game, array[0]);
@@ -310,7 +307,7 @@ void freeGame(Game* game) {
 
 
 int main() {
-    FILE* arq = fopen("games.csv", "r");
+    FILE* arq = fopen("/tmp/games.csv", "r");
     if (arq == NULL) {
         perror("Erro ao abrir o arquivo games.csv");
         return 1;

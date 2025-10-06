@@ -334,7 +334,7 @@ public class Main{
     public static void main(String []args) throws FileNotFoundException{
         //declaração scanners (teclado e arquivo)
         Scanner scanner = new Scanner(System.in);
-        File arq = new File("games.csv");
+        File arq = new File("/tmp/games.csv");
         Scanner scannerArq = new Scanner(arq);
 
         Game game[] = new Game[2000]; // array que vai guardar os nossos jogos
