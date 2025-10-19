@@ -1,9 +1,5 @@
-//package tp5_java;
 import java.util.Scanner;
 import java.io.*;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.io.IOException;
 
 class Game{
     //atributos dos games
@@ -297,91 +293,87 @@ class Game{
     }
 }
 
-public class heapsort {
+public class mergesort {
     public static int comparacoes = 0;
 
     public static int sort(Game array[], int n) {
         int swaps = 0;
     
-        //Alterar o vetor ignorando a posicao zero
-        Game[] tmp = new Game[n+1]; // Cria o array temporário 1-indexado
-        for(int i = 0; i < n; i++){
-            tmp[i+1] = array[i]; // Copia de 'ordenados' (0-index) para 'tmp' (1-index)
+        swaps = mergeSort(0, n-1,array);
+
+        return swaps;
+    }
+
+    public static int mergeSort(int esq, int dir, Game array[]) {
+        int swaps = 0;
+        if (esq < dir) {
+            int meio = (esq + dir) / 2;
+            swaps += mergeSort(esq, meio, array);
+            swaps += mergeSort(meio + 1, dir, array);
+            swaps += intercalar(esq, meio, dir, array);
+        }
+        return swaps;
+    }
+
+    public static int intercalar(int esq, int meio, int dir, Game array[]) {
+        int swaps = 0;
+        int n1, n2, i, j, k;
+
+        //Definir tamanho dos dois subarrays
+        n1 = meio - esq + 1;
+        n2 = dir - meio;
+
+        //arrays temporários do tipo Game
+        Game[] a1 = new Game[n1 + 1];
+        Game[] a2 = new Game[n2 + 1];
+
+        //Inicializar primeiro subarray
+        for (i = 0; i < n1; i++) {
+            a1[i] = array[esq + i];
         }
 
-        //Contrucao do heap
-        for(int tamHeap = 2; tamHeap <= n; tamHeap++){
-            swaps = swaps + construir(tamHeap,tmp);
+        //Inicializar segundo subarray
+        for (j = 0; j < n2; j++) {
+            a2[j] = array[meio + 1 + j];
         }
 
-        //Ordenacao propriamente dita
-        int tamHeap = n;
-        while(tamHeap > 1){
-            swap(1, tamHeap--, tmp);
-            swaps++;
-            swaps = swaps + reconstruir(tamHeap,tmp);
-        }
+        Game sentinel = new Game();
+        sentinel.setPreco(String.valueOf(Float.MAX_VALUE));
+        sentinel.setId(String.valueOf(Integer.MAX_VALUE)); 
+        
+        //Sentinela no final dos dois arrays
+        a1[n1] = sentinel; // a1[i] no final
+        a2[n2] = sentinel; // a2[j] no final
 
-        //Copiar os dados ordenados de 'tmp' de volta para 'array' ('ordenados')
-        for(int i = 0; i < n; i++){
-            array[i] = tmp[i+1]; // Copia de 'tmp' (1-index) para 'ordenados' (0-index)
+        //Intercalacao propriamente dita
+        i = j = 0;
+        for (k = esq; k <= dir; k++) {
+
+            if (!isMaior(a1[i], a2[j])) {
+                array[k] = a1[i++];
+            } else {
+                array[k] = a2[j++];
+                // Se um elemento de a2 (direita) é menor que um de a1 (esquerda),
+                // conta no swap.
+                // O número de inversões é o total de elementos restantes em a1.
+                swaps += (n1 - i);
+            }
         }
 
         return swaps;
-   }
+    }
 
     public static boolean isMaior(Game a, Game b) {
         comparacoes++;
-        if (a.getJogadores() > b.getJogadores()) {
-            
+        if (a.getPreco() > b.getPreco()) {
             return true;
-        } else if (a.getJogadores() < b.getJogadores()) {
+        } else if (a.getPreco() < b.getPreco()) {
             return false;
         } else {
-        // Desempate: Se jogadores são iguais, compara pelo ID
-            comparacoes++;
+            // Desempate: Se precos são iguais, compara pelo ID
+            comparacoes++; // Comparação extra para o desempate
             return a.getId() > b.getId();
         }
-    }
-
-
-   public static int construir(int tamHeap, Game array []){
-        int swaps = 0;
-
-        for(int i = tamHeap; i > 1 && isMaior(array[i], array[i/2]); i /= 2){
-            swap(i, i/2, array);
-            swaps++;
-        }
-
-        return swaps;
-   }
-
-
-   public static int reconstruir(int tamHeap, Game array[]){
-        int swaps = 0;
-
-        int i = 1;
-        while(i <= (tamHeap/2)){
-            int filho = getMaiorFilho(i, tamHeap, array);
-            if(isMaior(array[filho], array[i])){ // (array[filho] > array[i])
-                swap(i, filho,array);
-                swaps++;
-                i = filho;
-            }else{
-                i = tamHeap;
-            }
-        }
-        return swaps;
-   }
-
-    public static int getMaiorFilho(int i, int tamHeap , Game array[]){
-        int filho;
-        if (2*i == tamHeap || isMaior(array[2*i], array[2*i+1])){ // (array[2*i] > array[2*i+1])
-            filho = 2*i;
-        } else {
-            filho = 2*i + 1;
-        }
-        return filho;
     }
 
    public static void swap(int i, int j, Game array[]) {
@@ -437,7 +429,7 @@ public class heapsort {
 
         //declaração scanners (teclado e arquivo)
         Scanner scanner = new Scanner(System.in);
-        File arq = new File("/tmp/games.csv");
+        File arq = new File("games.csv");
         Scanner scannerArq = new Scanner(arq);
 
         Game game[] = new Game[2000]; // array que vai guardar os nossos jogos
@@ -511,7 +503,17 @@ public class heapsort {
 
         int swaps = sort(ordenados,n);
 
-        for(int i = 0; i < n; i++) {
+        System.out.println("  | 5 preços mais caros |");
+        // Imprime do fim do array (maiores) para o início
+        for(int i = n-1; i > n-6 && i >= 0; i--) { // Adicionado 'i >= 0' por segurança
+            System.out.println(ordenados[i].printResultado());
+        }
+
+        System.out.println();
+
+        System.out.println("  | 5 preços mais baratos |");
+        // Imprime do início do array (menores)
+        for(int i = 0; i < 5 && i < n; i++) { // Adicionado 'i < n' por segurança
             System.out.println(ordenados[i].printResultado());
         }
 
@@ -526,7 +528,7 @@ public class heapsort {
         String matricula = "885033";
         
         //Nome do txt que sera criado
-        String nomeArquivo = matricula + "_heapsort.txt"; 
+        String nomeArquivo = matricula + "_mergesort.txt"; 
         
         try (PrintWriter writer = new PrintWriter(new FileWriter(nomeArquivo))) {
             writer.printf("%s\t%d\t%d\t%s\n", matricula, comparacoes, swaps, tempoMs);
