@@ -515,9 +515,9 @@ public class binaria {
 	        if (compare(busca, flag)) { //verifica ocorrencia do FIM e decide se o programa acaba
             	continuar = false;
         	}else{
-                int Busca = Integer.parseInt(busca);
+                //int Busca = Integer.parseInt(busca);
                 for(int i = 0; i < jogos; i++) {
-                    if(Busca == game[i].getId()) {
+                    if(compare(busca, ordenados[i].getName())) {
                         comparacoes++;
                         System.out.println("SIM");
                         
