@@ -293,7 +293,98 @@ class Game{
     }
 }
 
-public class Main{
+public class binaria {
+    public static int comparacoes = 0;
+
+    public static int sort(Game array[], int n) {
+        int swaps = 0;
+    
+        //Alterar o vetor ignorando a posicao zero
+        Game[] tmp = new Game[n+1]; // Cria o array temporário 1-indexado
+        for(int i = 0; i < n; i++){
+            tmp[i+1] = array[i]; // Copia de 'ordenados' (0-index) para 'tmp' (1-index)
+        }
+
+        //Contrucao do heap
+        for(int tamHeap = 2; tamHeap <= n; tamHeap++){
+            swaps = swaps + construir(tamHeap,tmp);
+        }
+
+        //Ordenacao propriamente dita
+        int tamHeap = n;
+        while(tamHeap > 1){
+            swap(1, tamHeap--, tmp);
+            swaps++;
+            swaps = swaps + reconstruir(tamHeap,tmp);
+        }
+
+        //Copiar os dados ordenados de 'tmp' de volta para 'array' ('ordenados')
+        for(int i = 0; i < n; i++){
+            array[i] = tmp[i+1]; // Copia de 'tmp' (1-index) para 'ordenados' (0-index)
+        }
+
+        return swaps;
+   }
+
+    public static boolean isMaior(Game a, Game b) {
+        comparacoes++;
+        if (a.getJogadores() > b.getJogadores()) {
+            
+            return true;
+        } else if (a.getJogadores() < b.getJogadores()) {
+            return false;
+        } else {
+        // Desempate: Se jogadores são iguais, compara pelo ID
+            comparacoes++;
+            return a.getId() > b.getId();
+        }
+    }
+
+
+   public static int construir(int tamHeap, Game array []){
+        int swaps = 0;
+
+        for(int i = tamHeap; i > 1 && isMaior(array[i], array[i/2]); i /= 2){
+            swap(i, i/2, array);
+            swaps++;
+        }
+
+        return swaps;
+   }
+
+
+   public static int reconstruir(int tamHeap, Game array[]){
+        int swaps = 0;
+
+        int i = 1;
+        while(i <= (tamHeap/2)){
+            int filho = getMaiorFilho(i, tamHeap, array);
+            if(isMaior(array[filho], array[i])){ // (array[filho] > array[i])
+                swap(i, filho,array);
+                swaps++;
+                i = filho;
+            }else{
+                i = tamHeap;
+            }
+        }
+        return swaps;
+   }
+
+    public static int getMaiorFilho(int i, int tamHeap , Game array[]){
+        int filho;
+        if (2*i == tamHeap || isMaior(array[2*i], array[2*i+1])){ // (array[2*i] > array[2*i+1])
+            filho = 2*i;
+        } else {
+            filho = 2*i + 1;
+        }
+        return filho;
+    }
+
+   public static void swap(int i, int j, Game array[]) {
+		Game temp = array[i];
+		array[i] = array[j];
+		array[j] = temp;
+	}
 
     public static boolean compare(String str1, String str2) { //função que compara duas strings
 		boolean resposta = true;
@@ -331,7 +422,15 @@ public class Main{
         game.setTags(array[13]);
     }
 
+    public static long now() {
+        return System.nanoTime();
+    }
+
     public static void main(String []args) throws FileNotFoundException{
+        long inicio, fim;
+
+        inicio = now();
+
         //declaração scanners (teclado e arquivo)
         Scanner scanner = new Scanner(System.in);
         File arq = new File("/tmp/games.csv");
@@ -384,7 +483,9 @@ public class Main{
         String flag = "FIM"; //string de termino
 		boolean continuar = true; //flag booleana
 
-        
+        Game ordenados [] = new Game[2000];
+        int n = 0;
+
 	    while (continuar) { //loop para continuar até encontrar o FIM
 	        String busca = scanner.nextLine();
 
@@ -394,15 +495,71 @@ public class Main{
                 int Busca = Integer.parseInt(busca);
                 for(int i = 0; i < jogos; i++) {
                     if(Busca == game[i].getId()) {
-                        System.out.println(game[i].printResultado());
-                        
+                        ordenados[n] = game[i];
+                        n++;
+
                         i = jogos;
                     }
                 }
 	        }
 
 	    }
+
+        int swaps = sort(ordenados,n);
+
+		continuar = true; //flag booleana
+
+        while (continuar) { //loop para continuar até encontrar o FIM
+	        String busca = scanner.nextLine();
+
+	        if (compare(busca, flag)) { //verifica ocorrencia do FIM e decide se o programa acaba
+            	continuar = false;
+        	}else{
+                int Busca = Integer.parseInt(busca);
+                for(int i = 0; i < jogos; i++) {
+                    if(Busca == game[i].getId()) {
+                        comparacoes++;
+                        System.out.println("SIM");
+                        
+                        i = jogos;
+                    }else{
+                        comparacoes = comparacoes + 2;
+                        System.out.println("NAO");
+                    }
+                }
+	        }
+
+	    }
+
+        for(int i = 0; i < n; i++) {
+            System.out.println(ordenados[i].printResultado());
+        }
+
         scanner.close();
         scannerArq.close();
+
+        fim = now();
+
+        //Geração de Log (acho que é pra fazer isso)
+
+        double tempoMs = (fim - inicio) / 1_000_000.0;
+        String matricula = "885033";
+        
+        //Nome do txt que sera criado
+        String nomeArquivo = matricula + "_binaria.txt"; 
+        
+        try (PrintWriter writer = new PrintWriter(new FileWriter(nomeArquivo))) {
+            writer.printf("%s\t%s\t%d\n", matricula,tempoMs, comparacoes);
+        } catch (IOException e) {
+            System.err.println("Erro ao escrever o arquivo de log: " + e.getMessage());
+        }
+        
+        //Fim Geração de Log
+
+        //prints no console para conferir algumas coisas
+
+        //System.out.println("Esse e o numero de swaps:" + swaps);
+        //System.out.println("Esse e o numero de comparacoes:" + heapsort.comparacoes);
+        //System.out.printf("Tempo execucao desde a leitura do arquivo até a ordenacao e print: %.3f ms.\n", (fim - inicio) / 1_000_000.0);
     }
 }
