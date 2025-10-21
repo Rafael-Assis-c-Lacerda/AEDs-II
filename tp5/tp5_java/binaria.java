@@ -296,91 +296,115 @@ class Game{
 public class binaria {
     public static int comparacoes = 0;
 
-    public static int sort(Game array[], int n) {
-        int swaps = 0;
-    
-        //Alterar o vetor ignorando a posicao zero
-        Game[] tmp = new Game[n+1]; // Cria o array temporário 1-indexado
-        for(int i = 0; i < n; i++){
-            tmp[i+1] = array[i]; // Copia de 'ordenados' (0-index) para 'tmp' (1-index)
-        }
-
-        //Contrucao do heap
-        for(int tamHeap = 2; tamHeap <= n; tamHeap++){
-            swaps = swaps + construir(tamHeap,tmp);
-        }
-
-        //Ordenacao propriamente dita
-        int tamHeap = n;
-        while(tamHeap > 1){
-            swap(1, tamHeap--, tmp);
-            swaps++;
-            swaps = swaps + reconstruir(tamHeap,tmp);
-        }
-
-        //Copiar os dados ordenados de 'tmp' de volta para 'array' ('ordenados')
-        for(int i = 0; i < n; i++){
-            array[i] = tmp[i+1]; // Copia de 'tmp' (1-index) para 'ordenados' (0-index)
-        }
-
-        return swaps;
-   }
-
-    public static boolean isMaior(Game a, Game b) {
-        comparacoes++;
-        if (a.getJogadores() > b.getJogadores()) {
-            
-            return true;
-        } else if (a.getJogadores() < b.getJogadores()) {
-            return false;
-        } else {
-        // Desempate: Se jogadores são iguais, compara pelo ID
-            comparacoes++;
-            return a.getId() > b.getId();
-        }
-    }
-
-
-   public static int construir(int tamHeap, Game array []){
-        int swaps = 0;
-
-        for(int i = tamHeap; i > 1 && isMaior(array[i], array[i/2]); i /= 2){
-            swap(i, i/2, array);
-            swaps++;
-        }
-
-        return swaps;
-   }
-
-
-   public static int reconstruir(int tamHeap, Game array[]){
-        int swaps = 0;
-
-        int i = 1;
-        while(i <= (tamHeap/2)){
-            int filho = getMaiorFilho(i, tamHeap, array);
-            if(isMaior(array[filho], array[i])){ // (array[filho] > array[i])
-                swap(i, filho,array);
-                swaps++;
-                i = filho;
-            }else{
-                i = tamHeap;
+    public static void ordenarById(Game game[], int esq, int dir) {
+        int i = esq, j = dir;
+        int pivo = game[(esq + dir) / 2].getId();
+        while (i <= j) {
+            while(game[i].getId() < pivo) i++;
+            while(game[j].getId() > pivo) j--;
+            if (i <= j) {
+                swap( i, j,game);
+                i++;
+                j--;
             }
         }
-        return swaps;
-   }
-
-    public static int getMaiorFilho(int i, int tamHeap , Game array[]){
-        int filho;
-        if (2*i == tamHeap || isMaior(array[2*i], array[2*i+1])){ // (array[2*i] > array[2*i+1])
-            filho = 2*i;
-        } else {
-            filho = 2*i + 1;
-        }
-        return filho;
+        if(esq < j) ordenarById(game, esq, j);
+        if(i < dir) ordenarById(game, i, dir);
     }
 
-   public static void swap(int i, int j, Game array[]) {
+    public static int pesqBinId(Game game[], int jogos, int x) {
+        int esq = 0, dir = jogos - 1, meio;
+        while (esq <= dir) {
+            meio = (esq + dir) / 2;
+            if (x == game[meio].getId()) {
+                return meio; 
+            } 
+            else if (x > game[meio].getId()) {
+                esq = meio + 1;
+            } 
+            else {
+                dir = meio - 1;
+            }
+        }
+        return -1; 
+    }
+
+    public static int sort(Game[] ordenados, int n) { //usa o bubble sort mesmo que achei mais facil
+        int swaps = 0;
+        boolean trocou = true;
+
+        int i = 0;
+        while(i < n - 1 && trocou) {
+            trocou = false; 
+            for (int j = 0; j < n - 1 - i; j++) {
+                String nome1 = ordenados[j].getName();
+                String nome2 = ordenados[j + 1].getName();
+
+                if (compararStringsAlfabeticamente(nome1, nome2) > 0) {
+                    swap(j, j + 1, ordenados);     
+                    swaps++;
+                    trocou = true;
+                }
+                comparacoes++;
+            }
+            i++;
+        }
+        return swaps;
+    }
+
+    public static boolean pesquisaBinariaPorNome(Game[] ordenados, int n, String nomeBuscado) {
+        int esq = 0;
+        int dir = n - 1;
+
+        while (esq <= dir) {
+            int meio = (esq + dir) / 2;
+            String nomeMeio = ordenados[meio].getName();
+
+            // Usa a função de comparação alfabética manual
+            int resultadoComparacao = compararStringsAlfabeticamente(nomeBuscado, nomeMeio);
+            
+            comparacoes++;
+            if (resultadoComparacao == 0) {
+                return true; // Encontrou
+            } 
+            
+            // 2. Compara para ver se é menor (se não for igual)
+            comparacoes++;
+            if (resultadoComparacao < 0) {
+                dir = meio - 1;
+            } 
+            else {
+                esq = meio + 1;
+            }
+        }
+        
+        return false; // Nao encontrou
+    }
+
+    public static int compararStringsAlfabeticamente(String str1, String str2) {
+        int len1 = str1.length();
+        int len2 = str2.length();
+        
+        int minLength = len1;
+        if (len2 < minLength) {
+            minLength = len2;
+        }
+
+        // Loop para comparar caractere por caractere
+        for (int i = 0; i < minLength; i++) {
+            char c1 = str1.charAt(i);
+            char c2 = str2.charAt(i);
+
+            if (c1 != c2) {
+                return c1 - c2;
+            }
+        }
+
+        // A string mais curta vem primeiro.
+        return len1 - len2;
+    }
+
+    public static void swap(int i, int j, Game array[]) {
 		Game temp = array[i];
 		array[i] = array[j];
 		array[j] = temp;
@@ -479,6 +503,8 @@ public class binaria {
             //System.out.println("teste3");
         }
 
+        ordenarById(game, 0, jogos - 1);
+        
         //System.out.println("teste");
         String flag = "FIM"; //string de termino
 		boolean continuar = true; //flag booleana
@@ -493,13 +519,12 @@ public class binaria {
             	continuar = false;
         	}else{
                 int Busca = Integer.parseInt(busca);
-                for(int i = 0; i < jogos; i++) {
-                    if(Busca == game[i].getId()) {
-                        ordenados[n] = game[i];
-                        n++;
 
-                        i = jogos;
-                    }
+                int index = pesqBinId(game, jogos, Busca);
+
+                if(index != -1) {
+                    ordenados[n] = game[index];
+                    n++;
                 }
 	        }
 
@@ -515,25 +540,16 @@ public class binaria {
 	        if (compare(busca, flag)) { //verifica ocorrencia do FIM e decide se o programa acaba
             	continuar = false;
         	}else{
-                //int Busca = Integer.parseInt(busca);
-                for(int i = 0; i < jogos; i++) {
-                    if(compare(busca, ordenados[i].getName())) {
-                        comparacoes++;
-                        System.out.println("SIM");
-                        
-                        i = jogos;
-                    }else{
-                        comparacoes = comparacoes + 2;
-                        System.out.println("NAO");
-                    }
+                boolean encontrado = pesquisaBinariaPorNome(ordenados, n, busca);
+                
+                if (encontrado) {
+                    System.out.println(" SIM");
+                } else {
+                    System.out.println(" NAO");
                 }
 	        }
 
 	    }
-
-        for(int i = 0; i < n; i++) {
-            System.out.println(ordenados[i].printResultado());
-        }
 
         scanner.close();
         scannerArq.close();
