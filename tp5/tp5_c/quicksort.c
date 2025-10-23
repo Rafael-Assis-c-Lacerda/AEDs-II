@@ -78,14 +78,18 @@ void setData(Game* game, const char* entrada) {
     strncpy(mes, entrada, 3);
     mes[3] = '\0';
 
-    // Extrai Dia e Ano baseado no formato (ex: "May 5, 2020" vs "May 15, 2020")
-    if (entrada[5] == ',') {
+    // Lógica de parsing idêntica à 'setDataFormatada' do segundo código
+    if (strlen(entrada) == 8 && entrada[3] == ' ') { // Ex: "May 2020"
+        dia[0] = '0';
+        dia[1] = '1';
+        dia[2] = '\0';
+        strcpy(ano, entrada + 4);
+    } else if (entrada[5] == ',') { // Ex: "May 5, 2020"
         dia[0] = '0';
         dia[1] = entrada[4];
         dia[2] = '\0';
         strcpy(ano, entrada + 7);
-    } else { 
-        // Formato "Mmm DD, YYYY" (dia com 2 dígitos)
+    } else { // Ex: "May 15, 2020"
         dia[0] = entrada[4];
         dia[1] = entrada[5];
         dia[2] = '\0';
