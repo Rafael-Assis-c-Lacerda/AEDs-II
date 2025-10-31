@@ -395,24 +395,6 @@ int tamanho(Lista* lista) {
     return tam;
 }
 
-// Insere um elemento em uma posição específica
-void inserir(Lista* lista, Game* game, int pos) {
-    int tam = tamanho(lista);
-    if (pos < 0 || pos > tam) {
-        printf("Erro ao inserir: posicao invalida!\n");
-    } else if (pos == 0) {
-        inserirInicio(lista, game);
-    } else if (pos == tam) {
-        inserirFim(lista, game);
-    } else {
-        Celula* i = lista->primeiro;
-        for (int j = 0; j < pos; j++, i = i->prox);
-        Celula* tmp = newCelula(game);
-        tmp->prox = i->prox;
-        i->prox = tmp;
-    }
-}
-
 // Remove um elemento do início da lista
 Game* removerInicio(Lista* lista) {
     if (lista->primeiro == lista->ultimo) {
@@ -442,30 +424,6 @@ Game* removerFim(Lista* lista) {
     free(lista->ultimo);
     lista->ultimo = i;
     lista->ultimo->prox = NULL;
-    return resp;
-}
-
-// Remove um elemento de uma posição específica
-Game* remover(Lista* lista, int pos) {
-    Game* resp = NULL;
-    int tam = tamanho(lista);
-    if (lista->primeiro == lista->ultimo) {
-        printf("Erro ao remover: lista vazia!\n");
-    } else if (pos < 0 || pos >= tam) {
-        printf("Erro ao remover: posicao invalida!\n");
-    } else if (pos == 0) {
-        resp = removerInicio(lista);
-    } else if (pos == tam - 1) {
-        resp = removerFim(lista);
-    } else {
-        Celula* i = lista->primeiro;
-        for (int j = 0; j < pos; j++, i = i->prox);
-        Celula* tmp = i->prox;
-        resp = tmp->elemento;
-        i->prox = tmp->prox;
-        tmp->prox = NULL;
-        free(tmp);
-    }
     return resp;
 }
 
@@ -500,13 +458,72 @@ Game* findGameById(Lista* lista, int id) {
 Lista* newLista();
 void inserirFim(Lista* lista, Game* game);
 void inserirInicio(Lista* lista, Game* game);
-void inserir(Lista* lista, Game* game, int pos);
 Game* removerFim(Lista* lista);
 Game* removerInicio(Lista* lista);
-Game* remover(Lista* lista, int pos);
 int tamanho(Lista* lista);
 void freeLista(Lista* lista);
 Game* findGameById(Lista* lista, int id);
+
+typedef struct {
+    Celula* topo;
+} Pilha;
+
+// Construtor da Pilha (sem sentinela)
+Pilha* newPilha() {
+    Pilha* p = (Pilha*)malloc(sizeof(Pilha));
+    p->topo = NULL;
+    return p;
+}
+
+// Insere
+void inserir(Pilha* p, Game* game) {
+     Celula* tmp = newCelula(game);
+    tmp->prox = p->topo;
+    p->topo = tmp;
+}
+
+// Remove
+Game* remover(Pilha* p) {
+    if (p->topo == NULL) {
+        printf("Erro ao remover: pilha vazia!\n");
+        return NULL;
+    }
+    Game* resp = p->topo->elemento;
+    Celula* tmp = p->topo;
+    p->topo = p->topo->prox;
+    tmp->prox = NULL;
+    free(tmp);
+    return resp;
+}
+
+// Função auxiliar recursiva para mostrar a pilha da base para o topo
+void mostrarPilhaRecursivo(Celula* i, int* j) {
+    if (i != NULL) {
+        mostrarPilhaRecursivo(i->prox, j); // Vai até a base
+        // Imprime na volta (da base para o topo)
+        printf("[%d] ", (*j)++); 
+        imprimir(i->elemento);
+    }
+}
+
+// Libera a memória da pilha (apenas as células, não os Games)
+void freePilha(Pilha* p) {
+    Celula* atual = p->topo;
+    while (atual != NULL) {
+        Celula* tmp = atual;
+        atual = atual->prox;
+        // NÃO libera tmp->elemento, pois ele pertence a 'todosOsGames'
+        free(tmp);
+    }
+    free(p);
+}
+
+// Protótipos da Pilha
+Pilha* newPilha();
+void inserir(Pilha* p, Game* game);
+Game* remover(Pilha* p);
+void freePilha(Pilha* p);
+void mostrarPilhaRecursivo(Celula* i, int* j);
 
 int main() {
     FILE* arq = fopen("/tmp/games.csv", "r");
@@ -515,115 +532,80 @@ int main() {
         return 1;
     }
 
-    // Cria a lista principal para armazenar todos os jogos do CSV
+    // Cria a LISTA principal para armazenar todos os jogos do CSV
     Lista* todosOsGames = newLista();
     char linha[MAX_LINE_SIZE];
 
     fgets(linha, MAX_LINE_SIZE, arq); // Pular o cabeçalho
 
+    // Loop de leitura do CSV (sem mudanças)
     while (fgets(linha, MAX_LINE_SIZE, arq)) {
         linha[strcspn(linha, "\n\r")] = 0;
-        
         char* array[14];
         char aux[MAX_FIELD_SIZE] = {0};
         int contador = 0, aux_idx = 0;
         bool aspas = false;
-
         for (size_t i = 0; i < strlen(linha); i++) {
             char c = linha[i];
-            if (c == '"') {
-                aspas = !aspas;
-            } else if (c == ',' && !aspas) {
-                array[contador++] = strdup(aux);
-                aux_idx = 0;
-                memset(aux, 0, sizeof(aux));
-            } else {
-                if (aux_idx < MAX_FIELD_SIZE - 1) {
-                    aux[aux_idx++] = c;
-                }
-            }
+            if (c == '"') { aspas = !aspas; } 
+            else if (c == ',' && !aspas) { array[contador++] = strdup(aux); aux_idx = 0; memset(aux, 0, sizeof(aux)); }
+            else { if (aux_idx < MAX_FIELD_SIZE - 1) { aux[aux_idx++] = c; } }
         }
         array[contador] = strdup(aux);
-
-        // Aloca um novo Game, popula e insere na lista
         Game* novoGame = (Game*)malloc(sizeof(Game));
-        memset(novoGame, 0, sizeof(Game)); // Zera a struct para evitar ponteiros inválidos
+        memset(novoGame, 0, sizeof(Game));
         sets(novoGame, array);
-        inserirFim(todosOsGames, novoGame);
-
+        inserirFim(todosOsGames, novoGame); // Insere na LISTA 'todosOsGames'
         for (int i = 0; i <= contador; i++) free(array[i]);
     }
     fclose(arq);
     
-    Lista* pesquisa = newLista();
+    // Cria a PILHA de pesquisa
+    Pilha* pesquisa = newPilha();
     char busca[MAX_INPUT_SIZE];
     
-    // 1. Popula a lista 'pesquisa' com os IDs iniciais
+    // 1. Popula a PILHA 'pesquisa' com os IDs iniciais
     while (fgets(busca, MAX_INPUT_SIZE, stdin) && !compare(busca, "FIM\n")) {
         busca[strcspn(busca, "\n\r")] = 0;
         int buscaId = atoi(busca);
         Game* gameEncontrado = findGameById(todosOsGames, buscaId);
         if (gameEncontrado) {
-            inserirFim(pesquisa, gameEncontrado);
+            inserir(pesquisa, gameEncontrado);
         }
     }
 
     int n;
     scanf("%d", &n);
-    // Consumir o \n deixado pelo scanf
-    getchar(); 
+    getchar(); // Consumir o \n 
 
+    // Loop de operações na PILHA
     for(int i = 0; i < n; i++) {
         char comando_linha[MAX_INPUT_SIZE];
         fgets(comando_linha, MAX_INPUT_SIZE, stdin);
         comando_linha[strcspn(comando_linha, "\n\r")] = 0;
 
-        char comando[3];
-        strncpy(comando, comando_linha, 2);
-        comando[2] = '\0';
-        
         Game* gameRemovido = NULL;
 
-        if (compare(comando, "II")) {
-            int id = atoi(comando_linha + 3);
+        if (comando_linha[0] == 'I') { // Verifica SÓ o primeiro caractere
+            int id = atoi(comando_linha + 2); // Pula o 'I' e o ' '
             Game* gameEncontrado = findGameById(todosOsGames, id);
-            if(gameEncontrado) inserirInicio(pesquisa, gameEncontrado);
-        } else if (compare(comando, "IF")) {
-            int id = atoi(comando_linha + 3);
-            Game* gameEncontrado = findGameById(todosOsGames, id);
-            if(gameEncontrado) inserirFim(pesquisa, gameEncontrado);
-        } else if (compare(comando, "I*")) {
-            int pos, id;
-            sscanf(comando_linha + 3, "%d %d", &pos, &id);
-            Game* gameEncontrado = findGameById(todosOsGames, id);
-            if(gameEncontrado) inserir(pesquisa, gameEncontrado, pos);
-        } else if (compare(comando, "RI")) {
-            gameRemovido = removerInicio(pesquisa);
+            if(gameEncontrado) inserir(pesquisa, gameEncontrado);
+
+        } else if (comando_linha[0] == 'R') { // Verifica SÓ o primeiro caractere
+            gameRemovido = remover(pesquisa);
             if(gameRemovido) printf("(R) %s\n", gameRemovido->name);
-        } else if (compare(comando, "RF")) {
-            gameRemovido = removerFim(pesquisa);
-            if(gameRemovido) printf("(R) %s\n", gameRemovido->name);
-        } else if (compare(comando, "R*")) {
-            int pos = atoi(comando_linha + 3);
-            gameRemovido = remover(pesquisa, pos);
-            if(gameRemovido) printf("(R) %s\n", gameRemovido->name);
+            
+        } else {
+            printf("Erro: Comando desconhecido!\n");
         }
     }
 
+    // Impressão final (da base para o topo)
     int j = 0;
-    for (Celula* i = pesquisa->primeiro->prox; i != NULL; i = i->prox) {
-        printf("[%d] ", j++);
-        imprimir(i->elemento);
-    }
+    mostrarPilhaRecursivo(pesquisa->topo, &j);
 
-    Celula* atual = pesquisa->primeiro;
-    while(atual != NULL) {
-        Celula* tmp = atual;
-        atual = atual->prox;
-        free(tmp);
-    }
-    
-    free(pesquisa);
+    // Libera a pilha (apenas as células)
+    freePilha(pesquisa);
     
     // Libera a lista principal e TODOS os jogos que foram alocados
     freeLista(todosOsGames);
