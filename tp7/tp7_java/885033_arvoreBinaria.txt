@@ -1,0 +1,1 @@
+885033	40,04ms	775comparacoes
