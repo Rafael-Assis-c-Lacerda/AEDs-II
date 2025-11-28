@@ -41,7 +41,6 @@ typedef struct {
     int numTags;
 } Game;
 
-// Protótipos
 char** formatar(const char* entrada, int tipo, int* count);
 bool compare(const char* str1, const char* str2);
 char** removerEspacosIniciais(char** array, int size);
@@ -49,7 +48,7 @@ void freeGame(Game* game);
 void imprimir(Game* game);
 void imprimirArray(char** array, int n);
 
-// --- Setters ---
+// sets
 void setId(Game* game, const char* id) {
     game->id = atoi(id);
 }
@@ -166,6 +165,7 @@ void sets(Game* game, char* array[]) {
     setTags(game, array[13]);
 }
 
+// --- Helpers ---
 bool compare(const char* str1, const char* str2) {
     return strcmp(str1, str2) == 0;
 }
@@ -246,7 +246,7 @@ void freeGame(Game* game) {
     FREE_ARRAY(game->tags, game->numTags)
 }
 
-//arvore
+// --- AVL ---
 typedef struct No {
     Game elemento;
     struct No *esq, *dir;
@@ -343,7 +343,8 @@ bool pesquisarNomeAux(char* str, No *i) {
 }
 
 void pesquisarNome(char* str, ArvoreAVL *arvore) {
-    printf("%s\nraiz", str); 
+    printf("%s: raiz", str); 
+    
     if(pesquisarNomeAux(str, arvore->raiz)) {
         printf(" SIM\n");
     } else {
@@ -370,12 +371,11 @@ int main() {
     FILE* arq = fopen("/tmp/games.csv", "r");
     if (arq == NULL) { perror("Erro ao abrir o arquivo"); return 1; }
 
-    // Array de structs Game
     Game *game = (Game*)malloc(MAX_GAMES * sizeof(Game));
     int jogos = 0;
     char linha[MAX_LINE_SIZE];
 
-    fgets(linha, MAX_LINE_SIZE, arq); // Cabeçalho
+    fgets(linha, MAX_LINE_SIZE, arq); 
 
     while (fgets(linha, MAX_LINE_SIZE, arq)) {
         linha[strcspn(linha, "\n\r")] = 0;
@@ -422,7 +422,7 @@ int main() {
     clock_t inicio = clock();
     
     char buscaNome[MAX_INPUT_SIZE];
-    scanf(" %[^\n]", buscaNome);
+    scanf(" %[^\n]", buscaNome); 
     while(strcmp(buscaNome, "FIM") != 0) {
         pesquisarNome(buscaNome, arvore);
         scanf(" %[^\n]", buscaNome);
